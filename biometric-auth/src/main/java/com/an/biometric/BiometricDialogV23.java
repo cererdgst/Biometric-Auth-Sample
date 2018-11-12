@@ -1,24 +1,21 @@
 package com.an.biometric;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.design.button.MaterialButton;
+import android.support.design.widget.BottomSheetDialog;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-
-import androidx.annotation.NonNull;
 
 public class BiometricDialogV23 extends BottomSheetDialog implements View.OnClickListener {
 
     private Context context;
 
-    private Button btnCancel;
+    private MaterialButton btnCancel;
     private ImageView imgLogo;
     private TextView itemTitle, itemDescription, itemSubtitle, itemStatus;
 
@@ -81,6 +78,10 @@ public class BiometricDialogV23 extends BottomSheetDialog implements View.OnClic
         btnCancel.setText(negativeButtonText);
     }
 
+    public void setIcon(Integer icon){
+        imgLogo.setImageResource(icon);
+    }
+
     private void updateLogo() {
         try {
             Drawable drawable = getContext().getPackageManager().getApplicationIcon(context.getPackageName());
@@ -95,6 +96,6 @@ public class BiometricDialogV23 extends BottomSheetDialog implements View.OnClic
     @Override
     public void onClick(View view) {
         dismiss();
-        biometricCallback.onAuthenticationCancelled();
+        biometricCallback.onAuthenticationError(BiometricError.AUTHENTICATION_CANCELLED, null, null);
     }
 }

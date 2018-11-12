@@ -1,14 +1,15 @@
 package com.an.biometric;
 
 import android.hardware.biometrics.BiometricPrompt;
-import androidx.annotation.RequiresApi;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 
 @RequiresApi(api = Build.VERSION_CODES.P)
 public class BiometricCallbackV28 extends BiometricPrompt.AuthenticationCallback {
 
     private BiometricCallback biometricCallback;
+
     public BiometricCallbackV28(BiometricCallback biometricCallback) {
         this.biometricCallback = biometricCallback;
     }
@@ -24,20 +25,20 @@ public class BiometricCallbackV28 extends BiometricPrompt.AuthenticationCallback
     @Override
     public void onAuthenticationHelp(int helpCode, CharSequence helpString) {
         super.onAuthenticationHelp(helpCode, helpString);
-        biometricCallback.onAuthenticationHelp(helpCode, helpString);
+        biometricCallback.onAuthenticationError(BiometricError.AUTHENTICATION_HELP, helpCode, String.valueOf(helpString));
     }
 
 
     @Override
     public void onAuthenticationError(int errorCode, CharSequence errString) {
         super.onAuthenticationError(errorCode, errString);
-        biometricCallback.onAuthenticationError(errorCode, errString);
+        biometricCallback.onAuthenticationError(BiometricError.AUTHENTICATION_HELP, errorCode, String.valueOf(errString));
     }
 
 
     @Override
     public void onAuthenticationFailed() {
         super.onAuthenticationFailed();
-        biometricCallback.onAuthenticationFailed();
+        biometricCallback.onAuthenticationError(BiometricError.AUTHENTICATION_ERROR, null, null);
     }
 }

@@ -6,6 +6,8 @@ import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
+import android.support.v4.hardware.fingerprint.FingerprintManagerCompat;
+import android.support.v4.os.CancellationSignal;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -22,9 +24,6 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-
-import androidx.core.hardware.fingerprint.FingerprintManagerCompat;
-import androidx.core.os.CancellationSignal;
 
 
 @TargetApi(Build.VERSION_CODES.M)
@@ -44,13 +43,14 @@ public class BiometricManagerV23 {
     protected String subtitle;
     protected String description;
     protected String negativeButtonText;
+    protected Integer icon;
     private BiometricDialogV23 biometricDialogV23;
 
 
     public void displayBiometricPromptV23(final BiometricCallback biometricCallback) {
         generateKey();
 
-        if(initCipher()) {
+        if (initCipher()) {
 
             cryptoObject = new FingerprintManagerCompat.CryptoObject(cipher);
             FingerprintManagerCompat fingerprintManagerCompat = FingerprintManagerCompat.from(context);
@@ -61,14 +61,14 @@ public class BiometricManagerV23 {
                         public void onAuthenticationError(int errMsgId, CharSequence errString) {
                             super.onAuthenticationError(errMsgId, errString);
                             updateStatus(String.valueOf(errString));
-                            biometricCallback.onAuthenticationError(errMsgId, errString);
+                            biometricCallback.onAuthenticationError(BiometricError.AUTHENTICATION_ERROR, errMsgId, String.valueOf(errString));
                         }
 
                         @Override
                         public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
                             super.onAuthenticationHelp(helpMsgId, helpString);
                             updateStatus(String.valueOf(helpString));
-                            biometricCallback.onAuthenticationHelp(helpMsgId, helpString);
+                            biometricCallback.onAuthenticationError(BiometricError.AUTHENTICATION_HELP, helpMsgId, String.valueOf(helpString));
                         }
 
                         @Override
@@ -83,7 +83,7 @@ public class BiometricManagerV23 {
                         public void onAuthenticationFailed() {
                             super.onAuthenticationFailed();
                             updateStatus(context.getString(R.string.biometric_failed));
-                            biometricCallback.onAuthenticationFailed();
+                            biometricCallback.onAuthenticationError(BiometricError.AUTHENTICATION_FAILED, null, null);
                         }
                     }, null);
 
@@ -92,26 +92,25 @@ public class BiometricManagerV23 {
     }
 
 
-
     private void displayBiometricDialog(final BiometricCallback biometricCallback) {
         biometricDialogV23 = new BiometricDialogV23(context, biometricCallback);
         biometricDialogV23.setTitle(title);
         biometricDialogV23.setSubtitle(subtitle);
         biometricDialogV23.setDescription(description);
         biometricDialogV23.setButtonText(negativeButtonText);
+        biometricDialogV23.setIcon(icon);
         biometricDialogV23.show();
     }
 
 
-
     private void dismissDialog() {
-        if(biometricDialogV23 != null) {
+        if (biometricDialogV23 != null) {
             biometricDialogV23.dismiss();
         }
     }
 
     private void updateStatus(String status) {
-        if(biometricDialogV23 != null) {
+        if (biometricDialogV23 != null) {
             biometricDialogV23.updateStatus(status);
         }
     }
@@ -141,7 +140,6 @@ public class BiometricManagerV23 {
             exc.printStackTrace();
         }
     }
-
 
 
     private boolean initCipher() {
